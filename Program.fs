@@ -216,15 +216,15 @@ product 10 |> printfn "product 10 = %d"
 
 let sumOfOdds n =
     [ 1 .. n ]
-    |> List.fold (fun sumSoFar x ->
-        if x % 2 = 0 then sumSoFar else sumSoFar + x) 0
+        |> List.fold (fun sumSoFar x ->
+                if x % 2 = 0 then sumSoFar
+                else sumSoFar + x) 0
 
 let alternatingSum n =
     let f (isNeg, sumSoFar) x =
-        if isNeg then (false, sumSoFar - x) else (true, sumSoFar + x)
-    [ 1 .. n ]
-    |> List.fold f (true, 0)
-    |> snd
+        if isNeg then (false, sumSoFar - x)
+        else (true, sumSoFar + x)
+    [ 1 .. n ] |> List.fold f (true, 0) |> snd
 
 let sumOfSquaresFold n = [ 1 .. n ] |> List.fold (fun sumSoFar x -> sumSoFar + (x * x)) 0
 
@@ -234,9 +234,9 @@ type NameAndSize =
 
 let maxNameAndSize (list: List<NameAndSize>) =
     let innerMaxNameAndSize first rest =
-        rest
-        |> List.fold (fun maxSoFar x ->
-            if maxSoFar.Size < x.Size then x else maxSoFar) first
+        rest |> List.fold (fun maxSoFar x ->
+                           if maxSoFar.Size < x.Size then x
+                           else maxSoFar) first
     match list with
     | [] -> None
     | first :: rest -> Some(innerMaxNameAndSize first rest)
@@ -245,6 +245,128 @@ let maxNameAndSizeBuiltIn (list: List<NameAndSize>) =
     match list with
     | [] -> None
     | _ -> Some(list |> List.maxBy (fun item -> item.Size))
+
+// Using functions as building blocks
+
+let add2 x = x + 2
+let mult3 x = x * 3
+
+[ 1 .. 10 ] |> List.map add2 |> printfn "%A"
+
+[ 1 .. 10 ] |> List.map mult3 |> printfn "%A"
+
+let mult2ThenMult3 = add2 >> mult3
+
+[ 1 .. 10 ] |> List.map mult2ThenMult3 |> printfn "%A"
+
+let logMsg msg x =
+    printf "%s%i" msg x
+    x //without linefeed
+
+let logMsgN msg x =
+    printfn "%s%i" msg x
+    x //with linefeed
+
+let mult3ThenSquareLogged =
+    logMsg "before="
+    >> mult3
+    >> logMsg " after mult3="
+    >> square
+    >> logMsgN " result="
+
+mult3ThenSquareLogged 5 |> printfn "%A"
+
+[ 1 .. 10 ] |> List.map mult3ThenSquareLogged |> printfn "%A"
+
+
+// DSLs
+
+type DateScale =
+    | Hour
+    | Hours
+    | Day
+    | Days
+    | Week
+    | Weeks
+
+type DateDirection =
+    | Ago
+    | Hence
+
+let getDate interval scale direction =
+    let absHours =
+        match scale with
+        | Hour | Hours -> 1 * interval
+        | Day | Days -> 24 * interval
+        | Week | Weeks -> 7 * 24 * interval
+
+    let signedHours =
+        match direction with
+        | Ago -> -1 * absHours
+        | Hence -> absHours
+
+    System.DateTime.Now.AddHours(float signedHours)
+
+getDate 5 Days Ago |> printfn "5 Days Ago = %A"
+getDate 2 Hour Hence |> printfn "2 Hour Hence = %A"
+
+type FluentShape =
+    { label: string
+      color: string
+      onClick: FluentShape -> FluentShape }
+
+let defaultShape =
+    { label = ""
+      color = ""
+      onClick = fun shape -> shape }
+
+let click (shape: FluentShape) = shape.onClick shape
+
+let display shape =
+    printfn "My label=%s and my color=%s" shape.label shape.color
+    shape
+
+let setLabel label shape = { shape with FluentShape.label = label }
+
+let setColor color shape = { shape with FluentShape.color = color }
+
+let setClickAction action shape = { shape with FluentShape.onClick = shape.onClick >> action }
+
+let setRedBox = setColor "red" >> setLabel "box"
+
+let setBlueBox = setRedBox >> setColor "blue"
+
+let changeColorOnClick color = setColor color |> setClickAction
+
+let redBox = defaultShape |> setRedBox
+let blueBox = defaultShape |> setBlueBox
+
+redBox
+    |> display
+    |> changeColorOnClick "green"
+    |> click
+    |> display
+    |> ignore
+
+blueBox
+    |> display
+    |> setClickAction (setLabel "box2" >> setColor "green")
+    |> click
+    |> display
+    |> ignore
+    
+let rainbow =
+    ["red";"orange";"yellow";"green";"blue";"indigo";"violet"]
+
+let showRainbow =
+    rainbow
+    |> List.map (fun color -> setColor color >> display)
+    |> List.reduce (>>)
+
+
+defaultShape
+    |> showRainbow
+    |> ignore
 
 [<EntryPoint>]
 let main argv =
