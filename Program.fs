@@ -30,15 +30,22 @@ evens oneToFive |> printfn "evens oneToFive = %A"
 
 let SumOfSquaresTo100 = List.sum (List.map square [ 1 .. 100 ])
 
+SumOfSquaresTo100 |> printfn "SumOfSquaresTo100 = %d"
+
 let SumOfSquaresTo100Piped =
     [ 1 .. 100 ]
     |> List.map square
     |> List.sum
 
+SumOfSquaresTo100Piped |> printfn "SumOfSquaresTo100 = %d"
+
 let SumOfSquaresTo100Lambda =
     [ 1 .. 100 ]
     |> List.map (fun x -> x * x)
     |> List.sum
+
+SumOfSquaresTo100Lambda |> printfn "SumOfSquaresTo100Lambda = %d"
+
 
 // Pattern Matching
 
