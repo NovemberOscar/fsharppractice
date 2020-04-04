@@ -128,11 +128,43 @@ let rec NewQSort =
     function
     | [] -> []
     | first :: rest ->
+        printfn "%A %A" first rest
         let smaller, larger = List.partition ((>=) first) rest
         NewQSort smaller @ [ first ] @ NewQSort larger
 
 NewQSort [ 1; 5; 23; 18; 9; 1; 3 ] |> printfn "NewQSort -> %A"
 
+
+open System.Net
+open System
+open System.IO
+
+let fetchUrl callback url =
+    let req = WebRequest.Create(Uri(url))
+    use resp = req.GetResponse()
+    use stream = resp.GetResponseStream()
+    use reader = new IO.StreamReader(stream)
+    callback reader url
+
+let myCallback (reader: IO.StreamReader) url =
+    let html = reader.ReadToEnd()
+    printfn "Downloaded %s. Fist 100 is: \n%s" url (html.Substring(0, 100))
+    html
+
+let exampledotcom = fetchUrl myCallback "http://example.com"
+
+let curriedFetchUrl = fetchUrl myCallback
+
+let kernelorgsign = curriedFetchUrl "https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.6.tar.sign"
+
+let kernelSignUrls =
+    [ "https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.6.2.tar.sign"
+      "https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.5.15.tar.sign"
+      "https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.4.30.tar.sign" ]
+
+kernelSignUrls
+|> List.map curriedFetchUrl
+|> printfn "fetched kernel.org signs = %A"
 
 [<EntryPoint>]
 let main argv =
