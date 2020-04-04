@@ -128,7 +128,6 @@ let rec NewQSort =
     function
     | [] -> []
     | first :: rest ->
-        printfn "%A %A" first rest
         let smaller, larger = List.partition ((>=) first) rest
         NewQSort smaller @ [ first ] @ NewQSort larger
 
@@ -165,6 +164,50 @@ let kernelSignUrls =
 kernelSignUrls
 |> List.map curriedFetchUrl
 |> printfn "fetched kernel.org signs = %A"
+
+// Algebraic types
+
+type IntAndBool =
+    { intPart: int
+      boolType: bool } // "product" type
+
+type IntOrBool =
+    | IntChoice of int
+    | BoolChoice of bool // "sum/union" type
+
+// Pattern matching for flow of control
+let rec iter list = // Loops are generally done using recursion
+    match list with
+    | [] -> printfn ""
+    | first :: rest ->
+        printfn "%d" first
+        iter rest
+
+iter [ 1; 2; 3 ]
+
+// Pattern matching with union types
+
+type Shape =
+    | Circle of radius: int
+    | Rectangle of height: int * width: int
+    | Point of x: int * y: int
+    | Polygon of pointList: (int * int) list
+
+let draw shape =
+    match shape with
+    | Circle rad -> printfn "The circle has a radius of %d" rad
+    | Rectangle(height, width) -> printfn "The rectangle is %d high by %d wide" height width
+    | Polygon points -> printfn "The polygon is made of these points %A" points
+    | _ -> printfn "I don't recognize this shape"
+
+[ Circle(10)
+  Rectangle(4, 5)
+  Point(2, 3)
+  Polygon
+      ([ (1, 2)
+         (2, 3) ]) ]
+|> List.iter draw
+
 
 [<EntryPoint>]
 let main argv =
