@@ -368,6 +368,16 @@ defaultShape
     |> showRainbow
     |> ignore
 
+type Address = { Street: string; City: string; }   
+type Customer = { ID: int; Name: string; Address: Address}
+
+let customer1 = { ID = 1; Name = "Bob"; 
+      Address = {Street="123 Main"; City="NY" } }
+
+let { Name=name1 } = customer1 
+printfn "The customer is called %s" name1
+
+
 [<EntryPoint>]
 let main argv =
     printfn "Hello World from F#!"
