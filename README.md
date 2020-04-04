@@ -1,0 +1,2 @@
+# fsharppractice
+practice to fsharp
