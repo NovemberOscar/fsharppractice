@@ -104,6 +104,36 @@ printfn "Printing an int %i, a float %f, a bool %b" 1 2.0 true
 printfn "A string %s, and something generic %A" "hello" [ 1; 2; 3; 4 ]
 printfn "twoTuple=%A,\nPerson=%A,\nTemp=%A,\nEmployee=%A" twoTuple person1 tempInF worker
 
+// Sorting with F#
+
+let rec qSort list =
+    match list with
+    | [] -> []
+    | firstElm :: otherElms ->
+        let smallerElms =
+            otherElms
+            |> List.filter (fun e -> e < firstElm)
+            |> qSort
+
+        let largerElms =
+            otherElms
+            |> List.filter (fun e -> e >= firstElm)
+            |> qSort
+
+        smallerElms @ [ firstElm ] @ largerElms
+
+qSort [ 1; 5; 23; 18; 9; 1; 3 ] |> printfn "qSort -> %A"
+
+let rec NewQSort =
+    function
+    | [] -> []
+    | first :: rest ->
+        let smaller, larger = List.partition ((>=) first) rest
+        NewQSort smaller @ [ first ] @ NewQSort larger
+
+NewQSort [ 1; 5; 23; 18; 9; 1; 3 ] |> printfn "NewQSort -> %A"
+
+
 [<EntryPoint>]
 let main argv =
     printfn "Hello World from F#!"
