@@ -209,6 +209,43 @@ let draw shape =
 |> List.iter draw
 
 
+// Using functions to extract boilerplate code
+let product n = [ 1 .. n ] |> List.fold (fun productSoFar y -> productSoFar * y) 1
+
+product 10 |> printfn "product 10 = %d"
+
+let sumOfOdds n =
+    [ 1 .. n ]
+    |> List.fold (fun sumSoFar x ->
+        if x % 2 = 0 then sumSoFar else sumSoFar + x) 0
+
+let alternatingSum n =
+    let f (isNeg, sumSoFar) x =
+        if isNeg then (false, sumSoFar - x) else (true, sumSoFar + x)
+    [ 1 .. n ]
+    |> List.fold f (true, 0)
+    |> snd
+
+let sumOfSquaresFold n = [ 1 .. n ] |> List.fold (fun sumSoFar x -> sumSoFar + (x * x)) 0
+
+type NameAndSize =
+    { Name: string
+      Size: int }
+
+let maxNameAndSize (list: List<NameAndSize>) =
+    let innerMaxNameAndSize first rest =
+        rest
+        |> List.fold (fun maxSoFar x ->
+            if maxSoFar.Size < x.Size then x else maxSoFar) first
+    match list with
+    | [] -> None
+    | first :: rest -> Some(innerMaxNameAndSize first rest)
+
+let maxNameAndSizeBuiltIn (list: List<NameAndSize>) =
+    match list with
+    | [] -> None
+    | _ -> Some(list |> List.maxBy (fun item -> item.Size))
+
 [<EntryPoint>]
 let main argv =
     printfn "Hello World from F#!"
