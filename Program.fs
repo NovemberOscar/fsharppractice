@@ -377,6 +377,21 @@ let customer1 = { ID = 1; Name = "Bob";
 let { Name=name1 } = customer1 
 printfn "The customer is called %s" name1
 
+type FileErrorReason = 
+    | FileNotFound of string
+    | UnauthorizedAccess of string * System.Exception
+    | Unexpected of string
+    
+let readFile filePath =
+    try
+        use sr = new System.IO.StreamReader(filePath:string)
+        Ok(sr.ToString())
+    with
+        | :? System.IO.FileNotFoundException as ex -> Error (FileNotFound filePath)
+        | :? System.Security.SecurityException as ex -> Error (UnauthorizedAccess (filePath,ex))
+        | :? System.Exception as ex -> Error(Unexpected (ex.ToString()))
+
+readFile "helloword.txt" |> printfn "%A"
 
 [<EntryPoint>]
 let main argv =
