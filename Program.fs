@@ -14,8 +14,9 @@ let zeroToFive = [ 0; 1 ] @ oneToFive
 
 // Functions
 
-let square x = x * x
+let inline square x = x * x
 
+square 1.14 |> printfn "square 1.14 = %f"
 square 3 |> printfn "square 3 = %d"
 
 let add x y = x + y
