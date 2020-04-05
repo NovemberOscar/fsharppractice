@@ -387,11 +387,12 @@ let readFile filePath =
         use sr = new System.IO.StreamReader(filePath:string)
         Ok(sr.ToString())
     with
-        | :? System.IO.FileNotFoundException as ex -> Error (FileNotFound filePath)
-        | :? System.Security.SecurityException as ex -> Error (UnauthorizedAccess (filePath,ex))
-        | :? System.Exception as ex -> Error(Unexpected (ex.ToString()))
+        | :? System.IO.FileNotFoundException as ex -> Error ex.Message
+        | :? System.Security.SecurityException as ex -> Error ex.Message
+        | :? System.Exception as ex -> Error ex.Message
 
 readFile "helloword.txt" |> printfn "%A"
+
 
 [<EntryPoint>]
 let main argv =
