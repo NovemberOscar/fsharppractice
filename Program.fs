@@ -393,6 +393,50 @@ let readFile filePath =
 
 readFile "helloword.txt" |> printfn "%A"
 
+// Using the type system to ensure correct code
+
+type EmailAddress = EmailAddress of string
+
+let sendEmail (EmailAddress email) =
+    printfn "sent an email to %s" email
+    
+let aliceEmail = EmailAddress "alice@example.com"
+sendEmail aliceEmail
+
+// sendEmail "bob@example.com"   //error
+
+[<Measure>]
+type cm
+
+[<Measure>] 
+type inches
+
+[<Measure>] 
+type feet =
+   static member toInches(feet : float<feet>) : float<inches> = 
+      feet * 12.0<inches/feet>
+
+let meter = 100.0<cm>
+let yard = 3.0<feet>
+
+let yardInInches = feet.toInches(yard)
+
+// yard + meter  // Error
+
+[<Measure>] 
+type GBP
+
+
+[<Measure>] 
+type USD
+
+let gbp10 = 10.0<GBP>
+let usd10 = 10.0<USD>
+//gbp10 + gbp10             // allowed: same currency
+//gbp10 + usd10             // not allowed: different currency
+//gbp10 + 1.0               // not allowed: didn't specify a currency
+gbp10 + 1.0<_>            // allowed using wildcard
+
 
 [<EntryPoint>]
 let main argv =
